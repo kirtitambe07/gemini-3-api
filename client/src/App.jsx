@@ -11,7 +11,13 @@ import {
   Legend,
 } from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend
+);
 
 function App() {
   const [page, setPage] = useState("home");
@@ -30,18 +36,18 @@ function App() {
     const response = await fetch("http://localhost:5000/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ complaint, location }),
+      body: JSON.stringify({ complaint, location: location.trim() }),
+
     });
 
     const data = await response.json();
 
+    // ✅ USE BACKEND LOCATION + COORDINATES
     const enriched = {
       complaint,
       location: location || "Not specified",
-      ...data.analysis,
+      ...data.analysis, // includes category, priority, sentiment, summary, lat, lng
       confidence: Math.floor(85 + Math.random() * 15),
-      lat: 18.52 + Math.random() * 0.02,
-      lng: 73.85 + Math.random() * 0.02,
       time: new Date().toLocaleString(),
     };
 
@@ -126,7 +132,9 @@ function App() {
           🔍 Analyze Complaint →
         </button>
 
-        {loading && <p style={{ marginTop: "10px" }}>🤖 AI is analyzing...</p>}
+        {loading && (
+          <p style={{ marginTop: "10px" }}>🤖 AI is analyzing...</p>
+        )}
 
         {result && (
           <div
@@ -141,24 +149,22 @@ function App() {
             <h3>📊 AI Result</h3>
             <p>🏷 <b>Category:</b> {result.category}</p>
             <p>📍 <b>Location:</b> {result.location}</p>
-           <p>
-             🚦 <b>Priority:</b>{" "}
-             <span
-               style={{
-                 fontWeight: "bold",
-                 color:
-                   result.priority?.toLowerCase() === "high"
-                     ? "#dc2626"
-                     : result.priority?.toLowerCase() === "medium"
-                     ? "#f59e0b"
-                     : "#16a34a",
-               }}
-             >
-               {result.priority}
-             </span>
-           </p>
-
-
+            <p>
+              🚦 <b>Priority:</b>{" "}
+              <span
+                style={{
+                  fontWeight: "bold",
+                  color:
+                    result.priority === "High"
+                      ? "#dc2626"
+                      : result.priority === "Medium"
+                      ? "#f59e0b"
+                      : "#16a34a",
+                }}
+              >
+                {result.priority}
+              </span>
+            </p>
             <p>😊 <b>Sentiment:</b> {result.sentiment}</p>
             <p>🤖 <b>AI Confidence:</b> {result.confidence}%</p>
             <p>📝 <b>Summary:</b> {result.summary}</p>
@@ -194,5 +200,6 @@ function App() {
 }
 
 export default App;
+
 
 
