@@ -1,8 +1,8 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { useEffect } from "react";
 import L from "leaflet";
 
-// Fix default marker issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -13,16 +13,23 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
+function FixMapSize() {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => map.invalidateSize(), 200);
+  }, [map]);
+  return null;
+}
+
 function MapView({ complaints }) {
   return (
     <MapContainer
-      center={[18.5204, 73.8567]}   // Pune default
+      center={[18.5204, 73.8567]}
       zoom={12}
-      style={{ height: "400px", borderRadius: "16px" }}
+      style={{ height: "400px", width: "100%", borderRadius: "16px" }}
     >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <FixMapSize />
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
       {complaints.map((c, index) => (
         <Marker key={index} position={[c.lat, c.lng]}>
@@ -33,7 +40,7 @@ function MapView({ complaints }) {
             <br />
             Priority: {c.priority}
             <br />
-            Area: {c.area}
+            Location: {c.location}
           </Popup>
         </Marker>
       ))}
@@ -42,3 +49,7 @@ function MapView({ complaints }) {
 }
 
 export default MapView;
+
+
+
+
